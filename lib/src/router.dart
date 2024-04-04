@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'exception.dart';
 import 'model/module.dart';
 import 'model/route.dart';
+import 'page_route/cupertino.dart';
+import 'page_route/default.dart';
+import 'page_route/material.dart';
 import 'views/unauthorized_route.dart';
 import 'views/unknown_route.dart';
 
@@ -37,9 +40,9 @@ mixin ModuleRouterMixin {
 
       //listener(module);
 
-      final view = route.builder(routeSettings.arguments);
+      //final view = route.builder(routeSettings.arguments);
 
-      final pageRoute = _pageTransition(view, routeSettings);
+      final pageRoute = _pageRouter(route, routeSettings);
 
       return pageRoute;
     } on UnknownRouteException catch (_) {
@@ -103,40 +106,45 @@ mixin ModuleRouterMixin {
     return route;
   }
 
-  PageRoute _pageTransition(Widget view, RouteSettings? routeSettings) {
+  PageRoute _pageRouter(ModuleRoute route, RouteSettings? routeSettings) {
+    final view = route.builder(routeSettings?.arguments);
+
     if (Platform.isAndroid) {
-      return MaterialPageRoute(
+      return CustomMaterialRoute(
+        fullscreenDialog: route.isFullscreenDialog,
         settings: routeSettings,
         builder: (BuildContext context) => view,
       );
     }
 
     if (Platform.isIOS) {
-      return CupertinoPageRoute(
+      return CustomCupertinoRoute(
+        fullscreenDialog: route.isFullscreenDialog,
         settings: routeSettings,
         builder: (BuildContext context) => view,
       );
     }
 
-    return PageRouteBuilder(
+    return CustomPageRoute(
       settings: routeSettings,
+      fullscreenDialog: route.isFullscreenDialog,
       pageBuilder: (BuildContext context, a1, a2) => view,
-      transitionDuration: const Duration(seconds: 0),
     );
   }
 
   PageRoute _unauthorizedPageRoute() {
     const view = UnauthorizedRoute();
-    final unauthorizedRouteSettings = RouteSettings(
-      name: this.unauthorizedRedirectRoute,
-    );
+    final unauthorizedRouteSettings = RouteSettings(name: this.unauthorizedRedirectRoute);
+    final route = ModuleRoute(builder: (args) => view, path: '');
 
-    return _pageTransition(view, unauthorizedRouteSettings);
+    return _pageRouter(route, unauthorizedRouteSettings);
   }
 
   PageRoute _unknownPageRoute(RouteSettings routeSettings) {
     final view = UnknownRoute(routeName: routeSettings.name);
-    return _pageTransition(view, null);
+    final route = ModuleRoute(builder: (args) => view, path: '');
+
+    return _pageRouter(route, null);
   }
 }
 
