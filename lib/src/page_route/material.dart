@@ -15,12 +15,10 @@ class CustomMaterialRoute<T> extends PageRoute<T> with MaterialRouteTransitionMi
     final view = builder(context);
 
     if (super.fullscreenDialog) {
-      return SafeArea(
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          color: Colors.black.withOpacity(.6),
-          child: view,
-        ),
+      return Container(
+        padding: const EdgeInsets.all(8.0),
+        color: Colors.black.withOpacity(.6),
+        child: SafeArea(child: view),
       );
     }
 

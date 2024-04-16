@@ -21,15 +21,15 @@ mixin ModuleRouterMixin {
 
   //void listener(RouterModule module) {}
 
-  Route onGenerateRoute(RouteSettings routeSettings) {
+  Route<T> onGenerateRoute<T>(RouteSettings routeSettings) {
     if (routeSettings.name?.isNotEmpty != true) {
       throw Exception('ModuleRouter: Provide a path');
     }
 
-    return _router(routeSettings);
+    return _router<T>(routeSettings);
   }
 
-  Route _router(RouteSettings routeSettings) {
+  Route<T> _router<T>(RouteSettings routeSettings) {
     try {
       final module = _module(routeSettings.name!, this.modules);
       final route = _route(routeSettings, module);
@@ -42,7 +42,7 @@ mixin ModuleRouterMixin {
 
       //final view = route.builder(routeSettings.arguments);
 
-      final pageRoute = _pageRouter(route, routeSettings);
+      final pageRoute = _pageRouter<T>(route, routeSettings);
 
       return pageRoute;
     } on UnknownRouteException catch (_) {
@@ -106,45 +106,45 @@ mixin ModuleRouterMixin {
     return route;
   }
 
-  PageRoute _pageRouter(ModuleRoute route, RouteSettings? routeSettings) {
+  PageRoute<T> _pageRouter<T>(ModuleRoute route, RouteSettings? routeSettings) {
     final view = route.builder(routeSettings?.arguments);
 
     if (Platform.isAndroid) {
-      return CustomMaterialRoute(
+      return CustomMaterialRoute<T>(
         fullscreenDialog: route.isFullscreenDialog,
         settings: routeSettings,
         builder: (BuildContext context) => view,
       );
     }
 
-    if (Platform.isIOS) {
-      return CustomCupertinoRoute(
+    if (Platform.isIOS && !route.isFullscreenDialog) {
+      return CustomCupertinoRoute<T>(
         fullscreenDialog: route.isFullscreenDialog,
         settings: routeSettings,
         builder: (BuildContext context) => view,
       );
     }
 
-    return CustomPageRoute(
+    return CustomPageRoute<T>(
       settings: routeSettings,
       fullscreenDialog: route.isFullscreenDialog,
       pageBuilder: (BuildContext context, a1, a2) => view,
     );
   }
 
-  PageRoute _unauthorizedPageRoute() {
+  PageRoute<T> _unauthorizedPageRoute<T>() {
     const view = UnauthorizedRoute();
     final unauthorizedRouteSettings = RouteSettings(name: this.unauthorizedRedirectRoute);
     final route = ModuleRoute(builder: (args) => view, path: '');
 
-    return _pageRouter(route, unauthorizedRouteSettings);
+    return _pageRouter<T>(route, unauthorizedRouteSettings);
   }
 
-  PageRoute _unknownPageRoute(RouteSettings routeSettings) {
+  PageRoute<T> _unknownPageRoute<T>(RouteSettings routeSettings) {
     final view = UnknownRoute(routeName: routeSettings.name);
     final route = ModuleRoute(builder: (args) => view, path: '');
 
-    return _pageRouter(route, null);
+    return _pageRouter<T>(route, null);
   }
 }
 

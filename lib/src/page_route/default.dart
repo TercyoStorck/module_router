@@ -12,11 +12,18 @@ class CustomPageRoute<T> extends PageRouteBuilder<T> {
     final view = super.pageBuilder(context, animation, secondaryAnimation);
 
     if (super.fullscreenDialog) {
-      return SafeArea(
+      return FadeTransition(
+        opacity: animation,
         child: Container(
           padding: const EdgeInsets.all(8.0),
           color: Colors.black.withOpacity(.6),
-          child: view,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 1),
+              end: Offset.zero,
+            ).animate(animation),
+            child: SafeArea(child: view),
+          ),
         ),
       );
     }
@@ -33,5 +40,5 @@ class CustomPageRoute<T> extends PageRouteBuilder<T> {
   String get debugLabel => '${super.debugLabel}(${settings.name})';
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 0);
+  Duration get transitionDuration => const Duration(milliseconds: 300);
 }
